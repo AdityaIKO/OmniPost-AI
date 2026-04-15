@@ -1,0 +1,71 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user-specific settings and metadata.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's unique ID." },
+        "email": { "type": "string", "format": "email", "description": "The user's email address." },
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the user profile was created." }
+      },
+      "required": ["uid", "email"]
+    },
+    "BrandProfile": {
+      "title": "Brand Profile",
+      "description": "Stores brand-specific information for content generation.",
+      "type": "object",
+      "properties": {
+        "brandName": { "type": "string", "description": "Name of the brand." },
+        "industry": { "type": "string", "description": "Industry or niche." },
+        "targetAudience": { "type": "string", "description": "Description of the target audience." },
+        "toneOfVoice": { "type": "string", "description": "The desired tone for AI generation." },
+        "customInstructions": { "type": "string", "description": "Additional AI instructions." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of creation." }
+      },
+      "required": ["brandName", "industry", "targetAudience", "toneOfVoice"]
+    },
+    "GeneratedPost": {
+      "title": "Generated Post",
+      "description": "Stores AI-generated content for various platforms.",
+      "type": "object",
+      "properties": {
+        "brandProfileId": { "type": "string", "description": "Reference to the brand profile used." },
+        "platforms": { "type": "array", "items": { "type": "string" }, "description": "Selected social media platforms." },
+        "contentPillar": { "type": "string", "description": "The theme of the content." },
+        "topic": { "type": "string", "description": "The core topic of the post." },
+        "outputs": {
+          "type": "object",
+          "description": "Platform-specific text outputs.",
+          "properties": {
+            "X": { "type": "string" },
+            "Facebook": { "type": "string" },
+            "Instagram": { "type": "string" },
+            "TikTok": { "type": "string" }
+          }
+        },
+        "mediaUrl": { "type": "string", "description": "URL of the generated image or video." },
+        "mediaType": { "type": "string", "enum": ["image", "video"], "description": "Type of media generated." },
+        "scheduledDate": { "type": "string", "format": "date-time", "description": "When the post is scheduled." },
+        "status": { "type": "string", "enum": ["draft", "scheduled", "published"], "description": "Current status of the post." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of generation." }
+      },
+      "required": ["brandProfileId", "platforms", "topic", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document."
+    },
+    "/users/{userId}/brand_profiles/{profileId}": {
+      "schema": "BrandProfile",
+      "description": "Sub-collection for brand profiles."
+    },
+    "/users/{userId}/generated_posts/{postId}": {
+      "schema": "GeneratedPost",
+      "description": "Sub-collection for generated content."
+    }
+  }
+}

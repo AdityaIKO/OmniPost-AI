@@ -1,0 +1,128 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: /users/{userId}
+    // Document ID: userId (matches auth.uid)
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required, email format)
+    //   - displayName: string (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: /users/{userId}/brand_profiles/{profileId}
+    // Document ID: profileId
+    // Fields:
+    //   - brandName: string (required, 1-100 chars)
+    //   - industry: string (required, 1-100 chars)
+    //   - targetAudience: string (required, 1-500 chars)
+    //   - toneOfVoice: string (required, enum)
+    //   - customInstructions: string (optional, 0-2000 chars)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: /users/{userId}/generated_posts/{postId}
+    // Document ID: postId
+    // Fields:
+    //   - brandProfileId: string (required)
+    //   - platforms: list (required, max 10 items)
+    //   - contentPillar: string (optional)
+    //   - topic: string (required, 1-1000 chars)
+    //   - outputs: map (optional, platform-specific text)
+    //   - mediaUrl: string (optional, valid URL)
+    //   - mediaType: string (optional, enum: image, video)
+    //   - scheduledDate: timestamp (optional)
+    //   - status: string (required, enum: draft, scheduled, published)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUserProfile(data) {
+      return hasOnlyAllowedFields(['uid', 'email', 'displayName', 'createdAt']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             (data.displayName == null || (data.displayName is string && data.displayName.size() <= 100)) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidBrandProfile(data) {
+      return hasOnlyAllowedFields(['brandName', 'industry', 'targetAudience', 'toneOfVoice', 'customInstructions', 'createdAt']) &&
+             data.brandName is string && data.brandName.size() >= 1 && data.brandName.size() <= 100 &&
+             data.industry is string && data.industry.size() >= 1 && data.industry.size() <= 100 &&
+             data.targetAudience is string && data.targetAudience.size() >= 1 && data.targetAudience.size() <= 500 &&
+             data.toneOfVoice is string &&
+             (data.customInstructions == null || (data.customInstructions is string && data.customInstructions.size() <= 2000)) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidGeneratedPost(data) {
+      return hasOnlyAllowedFields(['brandProfileId', 'platforms', 'contentPillar', 'topic', 'outputs', 'mediaUrl', 'mediaType', 'scheduledDate', 'status', 'createdAt']) &&
+             data.brandProfileId is string &&
+             data.platforms is list && data.platforms.size() <= 10 &&
+             (data.contentPillar == null || (data.contentPillar is string && data.contentPillar.size() <= 100)) &&
+             data.topic is string && data.topic.size() >= 1 && data.topic.size() <= 1000 &&
+             (data.outputs == null || data.outputs is map) &&
+             (data.mediaUrl == null || isValidUrl(data.mediaUrl)) &&
+             (data.mediaType == null || data.mediaType in ['image', 'video']) &&
+             (data.scheduledDate == null || data.scheduledDate is timestamp) &&
+             data.status in ['draft', 'scheduled', 'published'] &&
+             data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow update: if isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow delete: if isOwner(userId);
+
+      match /brand_profiles/{profileId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidBrandProfile(request.resource.data);
+        allow update: if isOwner(userId) && isValidBrandProfile(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /generated_posts/{postId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidGeneratedPost(request.resource.data);
+        allow update: if isOwner(userId) && isValidGeneratedPost(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
