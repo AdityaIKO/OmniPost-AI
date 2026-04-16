@@ -1,7 +1,3 @@
-<div align="center">
-  <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
 # OmniPost AI 🚀
 
 OmniPost AI is an intelligent social media management dashboard. Designed for digital agencies and B2B brands, it automates multi-channel marketing by generating tailored AI copy and visuals, managing distinct brand personas, and scheduling omni-channel campaigns to scale content production effortlessly.
@@ -17,6 +13,24 @@ Designed with agency workflows in mind, OmniPost AI eliminates the friction betw
 * **Omni-Channel Calendar:** Visualize and manage your content pipeline seamlessly across X (Twitter), Facebook, and Instagram.
 * **Analytics Dashboard:** Get a bird's-eye view of your agency's output, tracking total generated content, scheduled posts, and published campaigns.
 * **Customizable UI/UX:** Sleek, modern interface with built-in Dark and Light mode toggles for optimal user experience.
+
+## 📸 Platform Previews
+
+### 1. Main Agency Dashboard
+Get a bird's-eye view of your agency's output, tracking total generated content, scheduled posts, and recent campaign performance.
+![OmniPost Main Dashboard](./assets/dashboard.jpg)
+
+### 2. AI Content Generation
+Quickly generate high-impact, 5-day campaign briefs—including custom copy and imagery—powered by the Gemini API.
+![Content Generator Interface](./assets/content-generator.jpg)
+
+### 3. Application Settings & Preferences
+Sleek, modern interface with customizable user profiles and built-in Dark/Light mode toggles for optimal user experience.
+![Settings & Appearance](./assets/settings.jpg)
+
+### 4. Omni-Channel Calendar
+Visualize and manage your scheduled content pipeline across all platforms. Keep track of posting streaks and plan multi-day campaigns with ease.
+![Omni-Channel Calendar](./assets/calendar.jpg)
 
 ## 🛠️ Tech Stack & Integration
 
